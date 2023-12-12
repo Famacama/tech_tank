@@ -1,8 +1,11 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 class Person {
     private String name;
@@ -53,12 +56,7 @@ class AddressBook {
 
         if (person1 != null && person2 != null) {
             long differenceInMillis = Math.abs(person1.getBirthDate().getTime() - person2.getBirthDate().getTime());
-            long ageDifferenceInDays = differenceInMillis / (24 * 60 * 60 * 1000); // Convert to days
-
-            // Mention who is the oldest
-            String oldestPerson = (person1.getBirthDate().compareTo(person2.getBirthDate()) > 0) ? person1Name : person2Name;
-
-            return ageDifferenceInDays;
+            return differenceInMillis / (24 * 60 * 60 * 1000); // Convert to days
         } else {
             System.out.println("One or both persons not found in the address book.");
             return -1;
@@ -68,16 +66,31 @@ class AddressBook {
     private Person findPersonByName(String name) {
         return persons.stream().filter(person -> name.equals(person.getName())).findFirst().orElse(null);
     }
+
+    public static AddressBook readAddressBookFromFile(String filePath) throws FileNotFoundException, ParseException {
+        AddressBook addressBook = new AddressBook();
+        File file = new File(filePath);
+
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] parts = line.split(", ");
+                if (parts.length == 3) {
+                    String name = parts[0];
+                    String gender = parts[1];
+                    String birthDate = parts[2];
+                    addressBook.addPerson(new Person(name, gender, birthDate));
+                }
+            }
+        }
+
+        return addressBook;
+    }
 }
 
 public class AddressBookReader {
-    public static void main(String[] args) throws ParseException {
-        AddressBook addressBook = new AddressBook();
-        addressBook.addPerson(new Person("Bill McKnight", "Male", "16/03/77"));
-        addressBook.addPerson(new Person("Paul Robinson", "Male", "15/01/85"));
-        addressBook.addPerson(new Person("Gemma Lane", "Female", "20/11/91"));
-        addressBook.addPerson(new Person("Sarah Stone", "Female", "20/09/80"));
-        addressBook.addPerson(new Person("Wes Jackson", "Male", "14/08/74"));
+    public static void main(String[] args) throws ParseException, FileNotFoundException {
+        AddressBook addressBook = AddressBook.readAddressBookFromFile("addressbook.txt");
 
         // 1. How many males are in the address book?
         int maleCount = addressBook.countMales();
