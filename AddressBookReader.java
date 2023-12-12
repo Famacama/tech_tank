@@ -61,26 +61,27 @@ class AddressBook {
     public String ageDifferenceInDays(String person1Name, String person2Name) {
         Person person1 = findPersonByName(person1Name);
         Person person2 = findPersonByName(person2Name);
-
+    
         if (person1 != null && person2 != null) {
+            // Determine the oldest person
+            Person oldestPerson = person1.getBirthDate().before(person2.getBirthDate()) ? person1 : person2;
+    
             long differenceInMillis = Math.abs(person1.getBirthDate().getTime() - person2.getBirthDate().getTime());
-            long ageDifferenceInDays = differenceInMillis / (24 * 60 * 60 * 1000); // Convert to days
-
-            // Determine the oldest persons
-            List<Person> oldestPersons = getOldestPersons();
-
+            long ageDifferenceInDays = differenceInMillis / (24 * 60 * 60 * 1000);
+    
             // Build the result string
             StringBuilder result = new StringBuilder();
             result.append("Number of males in the address book: ").append(countMales()).append("\n");
-
-            if (!oldestPersons.isEmpty()) {
-                result.append("Oldest persons in the address book: ");
-                result.append(oldestPersons.stream().map(Person::getName).collect(Collectors.joining(", ")));
-                result.append("\n");
+            result.append("Oldest person in the address book: ").append(oldestPerson.getName()).append("\n");
+    
+            if (oldestPerson.equals(person1)) {
+                result.append(person1.getName()).append(" is ").append(ageDifferenceInDays).append(" days older than ")
+                        .append(person2.getName()).append(".");
+            } else {
+                result.append(person2.getName()).append(" is ").append(ageDifferenceInDays).append(" days older than ")
+                        .append(person1.getName()).append(".");
             }
-
-            result.append(person1.getName()).append(" is ").append(ageDifferenceInDays).append(" days older than ").append(person2.getName()).append(".");
-
+    
             return result.toString();
         } else {
             return "One or both persons not found in the address book.";
