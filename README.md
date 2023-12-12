@@ -49,7 +49,8 @@ Bill McKnight is 2862 days older than Paul Robinson.
 ### 4. File Structure
 AddressBookReader.java: Main Java program file.
 
-addressbook.txt: External file containing the address book data.
+Addressbook.txt: External file containing the address book data.
+
 
 Author
 Fama Camara
