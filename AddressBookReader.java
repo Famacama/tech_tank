@@ -3,9 +3,11 @@ import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 class Person {
     private String name;
@@ -46,8 +48,14 @@ class AddressBook {
         return (int) persons.stream().filter(person -> "Male".equals(person.getGender())).count();
     }
 
-    public Person getOldestPerson() {
-        return persons.stream().min((p1, p2) -> p1.getBirthDate().compareTo(p2.getBirthDate())).orElse(null);
+    public List<Person> getOldestPersons() {
+        // Find the minimum birth date
+        Date minBirthDate = persons.stream().map(Person::getBirthDate).min(Date::compareTo).orElse(null);
+
+        // Filter persons with the minimum birth date
+        return persons.stream()
+                .filter(person -> person.getBirthDate().equals(minBirthDate))
+                .toList();
     }
 
     public String ageDifferenceInDays(String person1Name, String person2Name) {
@@ -58,13 +66,19 @@ class AddressBook {
             long differenceInMillis = Math.abs(person1.getBirthDate().getTime() - person2.getBirthDate().getTime());
             long ageDifferenceInDays = differenceInMillis / (24 * 60 * 60 * 1000); // Convert to days
 
-            // Determine the oldest person
-            Person oldestPerson = (person1.getBirthDate().compareTo(person2.getBirthDate()) > 0) ? person1 : person2;
+            // Determine the oldest persons
+            List<Person> oldestPersons = getOldestPersons();
 
             // Build the result string
             StringBuilder result = new StringBuilder();
             result.append("Number of males in the address book: ").append(countMales()).append("\n");
-            result.append("Oldest person in the address book: ").append(oldestPerson.getName()).append("\n");
+
+            if (!oldestPersons.isEmpty()) {
+                result.append("Oldest persons in the address book: ");
+                result.append(oldestPersons.stream().map(Person::getName).collect(Collectors.joining(", ")));
+                result.append("\n");
+            }
+
             result.append(person1.getName()).append(" is ").append(ageDifferenceInDays).append(" days older than ").append(person2.getName()).append(".");
 
             return result.toString();
