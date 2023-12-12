@@ -3,11 +3,9 @@ import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 class Person {
     private String name;
@@ -61,19 +59,19 @@ class AddressBook {
     public String ageDifferenceInDays(String person1Name, String person2Name) {
         Person person1 = findPersonByName(person1Name);
         Person person2 = findPersonByName(person2Name);
-    
+
         if (person1 != null && person2 != null) {
             // Determine the oldest person
             Person oldestPerson = person1.getBirthDate().before(person2.getBirthDate()) ? person1 : person2;
-    
+
             long differenceInMillis = Math.abs(person1.getBirthDate().getTime() - person2.getBirthDate().getTime());
             long ageDifferenceInDays = differenceInMillis / (24 * 60 * 60 * 1000);
-    
+
             // Build the result string
             StringBuilder result = new StringBuilder();
             result.append("Number of males in the address book: ").append(countMales()).append("\n");
             result.append("Oldest person in the address book: ").append(oldestPerson.getName()).append("\n");
-    
+
             if (oldestPerson.equals(person1)) {
                 result.append(person1.getName()).append(" is ").append(ageDifferenceInDays).append(" days older than ")
                         .append(person2.getName()).append(".");
@@ -81,7 +79,7 @@ class AddressBook {
                 result.append(person2.getName()).append(" is ").append(ageDifferenceInDays).append(" days older than ")
                         .append(person1.getName()).append(".");
             }
-    
+
             return result.toString();
         } else {
             return "One or both persons not found in the address book.";
@@ -95,6 +93,11 @@ class AddressBook {
     public static AddressBook readAddressBookFromFile(String filePath) throws FileNotFoundException, ParseException {
         AddressBook addressBook = new AddressBook();
         File file = new File(filePath);
+
+        // Check if the file exists
+        if (!file.exists()) {
+            throw new FileNotFoundException("Address book file not found: " + filePath);
+        }
 
         try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
@@ -114,23 +117,27 @@ class AddressBook {
 }
 
 public class AddressBookReader {
-    public static void main(String[] args) throws ParseException, FileNotFoundException {
-        AddressBook addressBook = AddressBook.readAddressBookFromFile("addressbook.txt");
+    public static void main(String[] args) {
+        try {
+            AddressBook addressBook = AddressBook.readAddressBookFromFile("addressbook.txt");
 
-        // Set default person names (Bill and Paul)
-        String person1Name = "Bill McKnight";
-        String person2Name = "Paul Robinson";
+            // Set default person names (Bill and Paul)
+            String person1Name = "Bill McKnight";
+            String person2Name = "Paul Robinson";
 
-        // Use command-line arguments if provided
-        if (args.length >= 2) {
-            person1Name = args[0];
-            person2Name = args[1];
+            // Use command-line arguments if provided
+            if (args.length >= 2) {
+                person1Name = args[0];
+                person2Name = args[1];
+            }
+
+            // Get the result string
+            String result = addressBook.ageDifferenceInDays(person1Name, person2Name);
+
+            // Print the result
+            System.out.println(result);
+        } catch (FileNotFoundException | ParseException e) {
+            System.err.println("Error: " + e.getMessage());
         }
-
-        // Get the result string
-        String result = addressBook.ageDifferenceInDays(person1Name, person2Name);
-
-        // Print the result
-        System.out.println(result);
     }
 }
