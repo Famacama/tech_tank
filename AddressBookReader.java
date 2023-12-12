@@ -52,8 +52,8 @@ class AddressBook {
         Person person2 = findPersonByName(person2Name);
 
         if (person1 != null && person2 != null) {
-            long differenceInMillis = person1.getBirthDate().getTime() - person2.getBirthDate().getTime();
-            long ageDifferenceInDays = differenceInMillis / (24 * 60 * 60 * 1000);
+            long differenceInMillis = Math.abs(person1.getBirthDate().getTime() - person2.getBirthDate().getTime());
+            long ageDifferenceInDays = differenceInMillis / (24 * 60 * 60 * 1000); // Convert to days
 
             // Mention who is the oldest
             String oldestPerson = (person1.getBirthDate().compareTo(person2.getBirthDate()) > 0) ? person1Name : person2Name;
