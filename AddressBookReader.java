@@ -50,16 +50,26 @@ class AddressBook {
         return persons.stream().min((p1, p2) -> p1.getBirthDate().compareTo(p2.getBirthDate())).orElse(null);
     }
 
-    public long ageDifferenceInDays(String person1Name, String person2Name) {
+    public String ageDifferenceInDays(String person1Name, String person2Name) {
         Person person1 = findPersonByName(person1Name);
         Person person2 = findPersonByName(person2Name);
 
         if (person1 != null && person2 != null) {
             long differenceInMillis = Math.abs(person1.getBirthDate().getTime() - person2.getBirthDate().getTime());
-            return differenceInMillis / (24 * 60 * 60 * 1000); // Convert to days
+            long ageDifferenceInDays = differenceInMillis / (24 * 60 * 60 * 1000); // Convert to days
+
+            // Determine the oldest person
+            Person oldestPerson = (person1.getBirthDate().compareTo(person2.getBirthDate()) > 0) ? person1 : person2;
+
+            // Build the result string
+            StringBuilder result = new StringBuilder();
+            result.append("Number of males in the address book: ").append(countMales()).append("\n");
+            result.append("Oldest person in the address book: ").append(oldestPerson.getName()).append("\n");
+            result.append(person1.getName()).append(" is ").append(ageDifferenceInDays).append(" days older than ").append(person2.getName()).append(".");
+
+            return result.toString();
         } else {
-            System.out.println("One or both persons not found in the address book.");
-            return -1;
+            return "One or both persons not found in the address book.";
         }
     }
 
@@ -92,20 +102,20 @@ public class AddressBookReader {
     public static void main(String[] args) throws ParseException, FileNotFoundException {
         AddressBook addressBook = AddressBook.readAddressBookFromFile("addressbook.txt");
 
-        // 1. How many males are in the address book?
-        int maleCount = addressBook.countMales();
-        System.out.println("Number of males in the address book: " + maleCount);
+        // Set default person names (Bill and Paul)
+        String person1Name = "Bill McKnight";
+        String person2Name = "Paul Robinson";
 
-        // 2. Who is the oldest person in the address book?
-        Person oldestPerson = addressBook.getOldestPerson();
-        System.out.println("Oldest person in the address book: " + oldestPerson.getName());
-
-        // 3. How many days older is Bill than Paul?
-        long ageDifference = addressBook.ageDifferenceInDays("Bill McKnight", "Paul Robinson");
-        if (ageDifference >= 0) {
-            System.out.println("Bill is " + ageDifference + " days older than Paul.");
-        } else {
-            System.out.println("One or both persons not found in the address book.");
+        // Use command-line arguments if provided
+        if (args.length >= 2) {
+            person1Name = args[0];
+            person2Name = args[1];
         }
+
+        // Get the result string
+        String result = addressBook.ageDifferenceInDays(person1Name, person2Name);
+
+        // Print the result
+        System.out.println(result);
     }
 }
